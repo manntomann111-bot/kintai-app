@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>簡易勤怠アプリ</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+  <h1>勤怠打刻システム</h1>
+  
+  <div id="g_id_onload"
+  data-client_id="178367620560-vnl8bdeu6nhvpc1e2re7spotp94lo9os.apps.googleusercontent.com"
+data-callback="handleCredentialResponse">
+  </div>
+  <div class="g_id_signin" data-type="standard"></div>
+
+  <hr>
+
+  <button id="btn-in" onclick="submitAttendance('出勤')" disabled>出勤</button>
+  <button id="btn-out" onclick="submitAttendance('退勤')" disabled>退勤</button>
+
+  <p id="msg"></p>
+
+  <script>
+    let savedIdToken = null;
+    const GAS_URL = "あなたのGASウェブアプリURL";
+
+    // ログイン成功時に実行されるコールバック
+    function handleCredentialResponse(response) {
+      savedIdToken = response.credential; // これがIDトークン
+      document.getElementById("msg").innerText = "ログインしました。打刻してください。";
+      document.getElementById("btn-in").disabled = false;
+      document.getElementById("btn-out").disabled = false;
+    }
+
+    // GASへデータを送信
+    async function submitAttendance(type) {
+      if (!savedIdToken) return;
+
+      document.getElementById("msg").innerText = "送信中...";
+      
+      try {
+        const res = await fetch(GAS_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            idToken: savedIdToken,
+            type: type
+          })
+        });
+        const result = await res.json();
+        document.getElementById("msg").innerText = result.message;
+      } catch (e) {
+        document.getElementById("msg").innerText = "エラーが発生しました";
+      }
+    }
+  </script>
+</body>
+</html>
