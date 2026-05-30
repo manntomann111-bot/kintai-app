@@ -1,51 +1,81 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>簡易勤怠アプリ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>勤怠打刻システム</title>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 480px;
+      margin: 60px auto;
+      padding: 0 20px;
+      text-align: center;
+    }
+    h1 { font-size: 22px; margin-bottom: 8px; }
+    .card {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 24px;
+      margin: 20px 0;
+    }
+    button {
+      padding: 14px 32px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 8px;
+    }
+    #btn-in  { background: #4CAF50; color: white; }
+    #btn-out { background: #f44336; color: white; }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+    #msg {
+      margin-top: 16px;
+      font-size: 15px;
+      color: #333;
+      min-height: 24px;
+    }
+  </style>
 </head>
 <body>
-  <h1>勤怠打刻システム</h1>
-  
-  <div id="g_id_onload"
-  data-client_id="178367620560-vnl8bdeu6nhvpc1e2re7spotp94lo9os.apps.googleusercontent.com"
-data-callback="handleCredentialResponse">
+
+  <h1>📋 勤怠打刻システム</h1>
+
+  <div class="card">
+    <div id="g_id_onload"
+      data-client_id="178367620560-vnl8bdeu6nhvpc1e2re7spotp94lo9os.apps.googleusercontent.com"
+      data-callback="handleCredentialResponse">
+    </div>
+    <div class="g_id_signin" data-type="standard"></div>
   </div>
-  <div class="g_id_signin" data-type="standard"></div>
 
-  <hr>
-
-  <button id="btn-in" onclick="submitAttendance('出勤')" disabled>出勤</button>
-  <button id="btn-out" onclick="submitAttendance('退勤')" disabled>退勤</button>
-
-  <p id="msg"></p>
+  <div class="card">
+    <button id="btn-in"  onclick="submitAttendance('出勤')" disabled>🟢 出勤</button>
+    <button id="btn-out" onclick="submitAttendance('退勤')" disabled>🔴 退勤</button>
+    <p id="msg">Googleアカウントでログインしてください</p>
+  </div>
 
   <script>
     let savedIdToken = null;
-    const GAS_URL = "あなたのGASウェブアプリURL";
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxuGaKeWdR3N7pEp-B-ASZyoa1OSWNZn0kwUaZDki2uLNqDiIRYr76TBWsweqfP0cnv/exec";
 
-    // ログイン成功時に実行されるコールバック
     function handleCredentialResponse(response) {
-      savedIdToken = response.credential; // これがIDトークン
+      savedIdToken = response.credential;
       document.getElementById("msg").innerText = "ログインしました。打刻してください。";
       document.getElementById("btn-in").disabled = false;
       document.getElementById("btn-out").disabled = false;
     }
 
-    // GASへデータを送信
     async function submitAttendance(type) {
       if (!savedIdToken) return;
-
       document.getElementById("msg").innerText = "送信中...";
-      
       try {
         const res = await fetch(GAS_URL, {
           method: "POST",
-          body: JSON.stringify({
-            idToken: savedIdToken,
-            type: type
-          })
+          body: JSON.stringify({ idToken: savedIdToken, type: type })
         });
         const result = await res.json();
         document.getElementById("msg").innerText = result.message;
@@ -54,5 +84,6 @@ data-callback="handleCredentialResponse">
       }
     }
   </script>
+
 </body>
 </html>
